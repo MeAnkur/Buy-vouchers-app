@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #main{
+        display: grid;
+        grid-template-columns: repeat(4,20%);
+        grid-gap: 20px;
+        
+      }
+      #main > div > img{
+        height:300px;
+        width: 200px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <a href="./addtowallet.html">addtowallet</a>
+    <a href="./purchases.html">purchases</a>
+    <div>
+      <h3 id="wallet">
+        <!--SHOW CURRENT WALLET VALUE HERE, ONLY THE NUMBER SHOULD BE VISIBLE-->
+
+      </h3>
+    </div>
+
+    <div id="main">
+      <!--SHOW ALL THE VOUCEHRS DATA FROM API HERE( IMAGE, NAME AND PRICE)-->
+
+    </div>
+  </body>
+</html>
+
+<script type="module">
+  //WRITE YOUR LOGIC HERE
+  let pur =JSON.parse(document.getElementById("purchases"))||[];
+
+   let wallet = JSON.parse(localStorage.getItem("wallet")) 
+   document.getElementById("wallet").innerHTML =wallet;
+
+   let main=document.getElementById("main");
+
+   let getdata = async () => {
+
+    try {
+
+      let res =await fetch(`https://masai-vouchers-api.herokuapp.com/api/vouchers`);
+      let data = await res.json();
+      //console.log(data[0].vouchers);
+      
+      append(data[0].vouchers);
+    } catch (error) {
+      console.log(error);
+    }
+   }
+
+   let append = (data) => {
+    //  document.getElementById("main"),innerHTML="";
+    main.innerHTML = "";
+
+     data.forEach((el,index)=>{
+
+      let div = document.createElement("div");
+
+      let img = document.createElement("img");
+      img.src= el.image;
+
+      let name = document.createElement("h3");
+      name.innerHTML= el.name;
+
+      let price = document.createElement("h3");
+      price.innerHTML= el.price;
+
+      let btn=document.createElement("button");
+      btn.innerText="Buy"
+      btn.setAttribute("id", "buy");
+      btn.addEventListener("click",()=>
+      {
+        if(wallet >= el.price)
+        {
+          wallet-=el.price;
+          localStorage.setItem("wallet", wallet);
+          document.getElementById("wallet").innerHTML=wallet;
+          
+          pur.push(el);
+          localStorage.setItem("purchases",JSON.stringify(pur));
+        }
+        else
+        {
+          alert("insufficient wallet amount!")
+        }
+      })
+
+      div.append(img,name,price,btn);
+      main.append(div)
+      //  console.log(el)
+
+     });
+   }
+
+   getdata();
+
+
+  // function add(el,index) {
+  //   console.log("Hiii",index)
+  // }
+</script>
